@@ -1,0 +1,204 @@
+	.file	"FIFO.c"
+	.text
+	.balign 2
+.globl _fifo8_init
+	.def	_fifo8_init;	.scl	2;	.type	32;	.endef
+_fifo8_init:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	8(%ebp), %eax
+	movl	12(%ebp), %ecx
+	movl	16(%ebp), %edx
+	movl	%ecx, 12(%eax)
+	movl	%edx, (%eax)
+	movl	%ecx, 16(%eax)
+	movl	$0, 20(%eax)
+	movl	$0, 4(%eax)
+	movl	$0, 8(%eax)
+	popl	%ebp
+	ret
+	.balign 2
+.globl _fifo8_put
+	.def	_fifo8_put;	.scl	2;	.type	32;	.endef
+_fifo8_put:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%ebx
+	movl	8(%ebp), %ecx
+	movl	12(%ebp), %ebx
+	cmpl	$0, 16(%ecx)
+	jne	L3
+	orl	$1, 20(%ecx)
+	orl	$-1, %eax
+L2:
+	popl	%ebx
+	popl	%ebp
+	ret
+L3:
+	movl	(%ecx), %eax
+	movl	4(%ecx), %edx
+	movb	%bl, (%edx,%eax)
+	movl	4(%ecx), %eax
+	incl	%eax
+	movl	%eax, 4(%ecx)
+	cmpl	12(%ecx), %eax
+	je	L5
+L4:
+	decl	16(%ecx)
+	xorl	%eax, %eax
+	jmp	L2
+L5:
+	movl	$0, 4(%ecx)
+	jmp	L4
+	.balign 2
+.globl _fifo8_get
+	.def	_fifo8_get;	.scl	2;	.type	32;	.endef
+_fifo8_get:
+	pushl	%ebp
+	orl	$-1, %eax
+	movl	%esp, %ebp
+	pushl	%esi
+	pushl	%ebx
+	movl	8(%ebp), %ecx
+	movl	16(%ecx), %esi
+	movl	12(%ecx), %ebx
+	cmpl	%ebx, %esi
+	je	L6
+	movl	8(%ecx), %eax
+	movl	(%ecx), %edx
+	movzbl	(%eax,%edx), %edx
+	incl	%eax
+	movl	%eax, 8(%ecx)
+	cmpl	%ebx, %eax
+	je	L9
+L8:
+	leal	1(%esi), %eax
+	movl	%eax, 16(%ecx)
+	movl	%edx, %eax
+L6:
+	popl	%ebx
+	popl	%esi
+	popl	%ebp
+	ret
+L9:
+	movl	$0, 8(%ecx)
+	jmp	L8
+	.balign 2
+.globl _fifo8_status
+	.def	_fifo8_status;	.scl	2;	.type	32;	.endef
+_fifo8_status:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	8(%ebp), %edx
+	popl	%ebp
+	movl	12(%edx), %eax
+	subl	16(%edx), %eax
+	ret
+	.balign 2
+.globl _fifo32_init
+	.def	_fifo32_init;	.scl	2;	.type	32;	.endef
+_fifo32_init:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	8(%ebp), %eax
+	movl	16(%ebp), %edx
+	movl	12(%ebp), %ecx
+	movl	%edx, (%eax)
+	movl	%ecx, 12(%eax)
+	movl	20(%ebp), %edx
+	movl	%ecx, 16(%eax)
+	movl	$0, 20(%eax)
+	movl	$0, 4(%eax)
+	movl	$0, 8(%eax)
+	movl	%edx, 24(%eax)
+	popl	%ebp
+	ret
+	.balign 2
+.globl _fifo32_put
+	.def	_fifo32_put;	.scl	2;	.type	32;	.endef
+_fifo32_put:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%ebx
+	movl	8(%ebp), %ebx
+	cmpl	$0, 16(%ebx)
+	jne	L13
+	orl	$1, 20(%ebx)
+	orl	$-1, %eax
+L12:
+	movl	-4(%ebp), %ebx
+	leave
+	ret
+L13:
+	movl	4(%ebx), %ecx
+	movl	(%ebx), %edx
+	movl	12(%ebp), %eax
+	movl	%eax, (%edx,%ecx,4)
+	movl	4(%ebx), %eax
+	incl	%eax
+	movl	%eax, 4(%ebx)
+	cmpl	12(%ebx), %eax
+	je	L17
+L14:
+	movl	24(%ebx), %eax
+	decl	16(%ebx)
+	testl	%eax, %eax
+	je	L15
+	cmpl	$2, 4(%eax)
+	je	L15
+	pushl	$0
+	pushl	$-1
+	pushl	%eax
+	call	_task_run
+	addl	$12, %esp
+L15:
+	xorl	%eax, %eax
+	jmp	L12
+L17:
+	movl	$0, 4(%ebx)
+	jmp	L14
+	.balign 2
+.globl _fifo32_get
+	.def	_fifo32_get;	.scl	2;	.type	32;	.endef
+_fifo32_get:
+	pushl	%ebp
+	orl	$-1, %eax
+	movl	%esp, %ebp
+	pushl	%esi
+	pushl	%ebx
+	movl	8(%ebp), %ecx
+	movl	16(%ecx), %esi
+	movl	12(%ecx), %ebx
+	cmpl	%ebx, %esi
+	je	L18
+	movl	8(%ecx), %eax
+	movl	(%ecx), %edx
+	movl	(%edx,%eax,4), %edx
+	incl	%eax
+	movl	%eax, 8(%ecx)
+	cmpl	%ebx, %eax
+	je	L21
+L20:
+	leal	1(%esi), %eax
+	movl	%eax, 16(%ecx)
+	movl	%edx, %eax
+L18:
+	popl	%ebx
+	popl	%esi
+	popl	%ebp
+	ret
+L21:
+	movl	$0, 8(%ecx)
+	jmp	L20
+	.balign 2
+.globl _fifo32_status
+	.def	_fifo32_status;	.scl	2;	.type	32;	.endef
+_fifo32_status:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	8(%ebp), %edx
+	popl	%ebp
+	movl	12(%edx), %eax
+	subl	16(%edx), %eax
+	ret
+	.def	_task_run;	.scl	2;	.type	32;	.endef

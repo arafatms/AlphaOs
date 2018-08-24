@@ -1,0 +1,157 @@
+[FORMAT "WCOFF"]
+[INSTRSET "i486p"]
+[OPTIMIZE 1]
+[OPTION 1]
+[BITS 32]
+	EXTERN	_io_in8
+	EXTERN	_io_out8
+[FILE "Keyboard.c"]
+[SECTION .text]
+	GLOBAL	_keyboard_manage
+_keyboard_manage:
+	PUSH	EBP
+	MOV	EBP,ESP
+	POP	EBP
+	RET
+	GLOBAL	_wait_KBC_sendready
+_wait_KBC_sendready:
+	PUSH	EBP
+	MOV	EBP,ESP
+L3:
+	PUSH	100
+	CALL	_io_in8
+	POP	EDX
+	AND	EAX,2
+	JNE	L3
+	LEAVE
+	RET
+	GLOBAL	_init_keyboard
+_init_keyboard:
+	PUSH	EBP
+	MOV	EBP,ESP
+	MOV	EAX,DWORD [8+EBP]
+	MOV	DWORD [_keyfifo],EAX
+	MOV	EAX,DWORD [12+EBP]
+	MOV	DWORD [_keydata0],EAX
+	CALL	_wait_KBC_sendready
+	PUSH	96
+	PUSH	100
+	CALL	_io_out8
+	CALL	_wait_KBC_sendready
+	POP	ECX
+	POP	EAX
+	MOV	DWORD [12+EBP],71
+	MOV	DWORD [8+EBP],96
+	LEAVE
+	JMP	_io_out8
+	GLOBAL	_enable_mouse
+_enable_mouse:
+	PUSH	EBP
+	MOV	EBP,ESP
+	MOV	EAX,DWORD [8+EBP]
+	MOV	DWORD [_mousefifo],EAX
+	MOV	EAX,DWORD [12+EBP]
+	MOV	DWORD [_mousedata0],EAX
+	CALL	_wait_KBC_sendready
+	PUSH	212
+	PUSH	100
+	CALL	_io_out8
+	CALL	_wait_KBC_sendready
+	PUSH	244
+	PUSH	96
+	CALL	_io_out8
+	MOV	EAX,DWORD [16+EBP]
+	MOV	BYTE [3+EAX],0
+	LEAVE
+	RET
+	GLOBAL	_mouse_decode
+_mouse_decode:
+	PUSH	EBP
+	MOV	EBP,ESP
+	PUSH	ESI
+	PUSH	EBX
+	MOV	EDX,DWORD [8+EBP]
+	MOV	ECX,DWORD [12+EBP]
+	MOV	ESI,ECX
+	MOV	AL,BYTE [3+EDX]
+	TEST	AL,AL
+	JNE	L10
+	CMP	CL,-6
+	JE	L19
+L18:
+	XOR	EAX,EAX
+L9:
+	POP	EBX
+	POP	ESI
+	POP	EBP
+	RET
+L19:
+	MOV	BYTE [3+EDX],1
+	JMP	L18
+L10:
+	CMP	AL,1
+	JE	L20
+	CMP	AL,2
+	JE	L21
+	CMP	AL,3
+	JE	L22
+	OR	EAX,-1
+	JMP	L9
+L22:
+	MOV	BL,BYTE [EDX]
+	AND	ESI,255
+	MOV	EAX,EBX
+	MOV	BYTE [2+EDX],CL
+	AND	EAX,7
+	MOV	DWORD [8+EDX],ESI
+	MOV	DWORD [12+EDX],EAX
+	MOV	AL,BL
+	MOVZX	ECX,BYTE [1+EDX]
+	AND	EAX,16
+	MOV	DWORD [4+EDX],ECX
+	MOV	BYTE [3+EDX],1
+	TEST	AL,AL
+	JE	L16
+	OR	ECX,-256
+	MOV	DWORD [4+EDX],ECX
+L16:
+	AND	EBX,32
+	TEST	BL,BL
+	JE	L17
+	OR	DWORD [8+EDX],-256
+L17:
+	NEG	DWORD [8+EDX]
+	MOV	EAX,1
+	JMP	L9
+L21:
+	MOV	BYTE [1+EDX],CL
+	MOV	BYTE [3+EDX],3
+	JMP	L18
+L20:
+	AND	ESI,-56
+	MOV	EAX,ESI
+	CMP	AL,8
+	JNE	L18
+	MOV	BYTE [EDX],CL
+	MOV	BYTE [3+EDX],2
+	JMP	L18
+	GLOBAL	_keyfifo
+[SECTION .data]
+	ALIGNB	4
+_keyfifo:
+	RESB	4
+	GLOBAL	_keydata0
+[SECTION .data]
+	ALIGNB	4
+_keydata0:
+	RESB	4
+	GLOBAL	_mousefifo
+[SECTION .data]
+	ALIGNB	4
+_mousefifo:
+	RESB	4
+	GLOBAL	_mousedata0
+[SECTION .data]
+	ALIGNB	4
+_mousedata0:
+	RESB	4

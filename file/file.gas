@@ -1,0 +1,175 @@
+	.file	"file.c"
+	.text
+	.balign 2
+.globl _file_search
+	.def	_file_search;	.scl	2;	.type	32;	.endef
+_file_search:
+	pushl	%ebp
+	xorl	%ecx, %ecx
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	subl	$20, %esp
+	movl	8(%ebp), %ebx
+L6:
+	movb	$32, -28(%ebp,%ecx)
+	incl	%ecx
+	cmpl	$10, %ecx
+	jle	L6
+	xorl	%ecx, %ecx
+	xorl	%edi, %edi
+	cmpb	$0, (%ebx)
+	je	L33
+L15:
+	xorl	%eax, %eax
+	cmpl	$10, %ecx
+	jg	L1
+	movb	(%edi,%ebx), %dl
+	cmpb	$46, %dl
+	je	L37
+L12:
+	leal	-97(%edx), %eax
+	movb	%dl, -28(%ebp,%ecx)
+	cmpb	$25, %al
+	ja	L14
+	leal	-32(%edx), %eax
+	movb	%al, -28(%ebp,%ecx)
+L14:
+	incl	%ecx
+L9:
+	incl	%edi
+	cmpb	$0, (%edi,%ebx)
+	jne	L15
+L33:
+	xorl	%edi, %edi
+	cmpl	16(%ebp), %edi
+	jge	L17
+	movl	12(%ebp), %esi
+	movl	$0, -32(%ebp)
+L29:
+	cmpb	$0, (%esi)
+	je	L17
+	testb	$24, 11(%esi)
+	jne	L27
+	movl	12(%ebp), %ebx
+	xorl	%ecx, %ecx
+	addl	-32(%ebp), %ebx
+L28:
+	movzbl	(%ebx), %edx
+	movsbl	-28(%ebp,%ecx),%eax
+	cmpl	%eax, %edx
+	jne	L27
+	incl	%ecx
+	incl	%ebx
+	movl	%esi, %eax
+	cmpl	$10, %ecx
+	jle	L28
+L1:
+	addl	$20, %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+L27:
+	incl	%edi
+	addl	$32, %esi
+	addl	$32, -32(%ebp)
+	cmpl	16(%ebp), %edi
+	jl	L29
+L17:
+	xorl	%eax, %eax
+	jmp	L1
+L37:
+	cmpl	$8, %ecx
+	jg	L12
+	movl	$8, %ecx
+	jmp	L9
+	.balign 2
+.globl _file_readfat
+	.def	_file_readfat;	.scl	2;	.type	32;	.endef
+_file_readfat:
+	pushl	%ebp
+	xorl	%ecx, %ecx
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	movl	8(%ebp), %edi
+	movl	12(%ebp), %esi
+	xorl	%ebx, %ebx
+L43:
+	movzbl	1(%ecx,%esi), %eax
+	movzbl	(%ecx,%esi), %edx
+	sall	$8, %eax
+	orl	%eax, %edx
+	andl	$4095, %edx
+	movl	%edx, (%edi,%ebx,4)
+	movb	1(%ecx,%esi), %al
+	movzbl	2(%ecx,%esi), %edx
+	shrb	$4, %al
+	addl	$3, %ecx
+	sall	$4, %edx
+	movzbl	%al, %eax
+	orl	%edx, %eax
+	movl	%eax, 4(%edi,%ebx,4)
+	addl	$2, %ebx
+	cmpl	$2879, %ebx
+	jle	L43
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+	.balign 2
+.globl _file_loadfile
+	.def	_file_loadfile;	.scl	2;	.type	32;	.endef
+_file_loadfile:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	movl	12(%ebp), %ecx
+	movl	8(%ebp), %esi
+	movl	16(%ebp), %ebx
+L47:
+	cmpl	$512, %ecx
+	jle	L64
+	xorl	%edx, %edx
+L60:
+	movl	%esi, %eax
+	movl	24(%ebp), %edi
+	sall	$9, %eax
+	addl	%edx, %eax
+	movb	(%eax,%edi), %al
+	movb	%al, (%edx,%ebx)
+	incl	%edx
+	cmpl	$511, %edx
+	jle	L60
+	movl	20(%ebp), %eax
+	subl	$512, %ecx
+	addl	$512, %ebx
+	movl	(%eax,%esi,4), %esi
+	jmp	L47
+L64:
+	xorl	%edx, %edx
+	cmpl	%ecx, %edx
+	jge	L46
+L55:
+	movl	%esi, %eax
+	movl	24(%ebp), %edi
+	sall	$9, %eax
+	addl	%edx, %eax
+	movb	(%eax,%edi), %al
+	movb	%al, (%edx,%ebx)
+	incl	%edx
+	cmpl	%ecx, %edx
+	jl	L55
+L46:
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret

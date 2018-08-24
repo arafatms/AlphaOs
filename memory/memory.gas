@@ -1,0 +1,286 @@
+	.file	"memory.c"
+	.text
+	.balign 2
+.globl _memtest
+	.def	_memtest;	.scl	2;	.type	32;	.endef
+_memtest:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%esi
+	pushl	%ebx
+	xorl	%esi, %esi
+	call	_io_load_eflags
+	orl	$262144, %eax
+	pushl	%eax
+	call	_io_store_eflags
+	call	_io_load_eflags
+	popl	%edx
+	testl	$262144, %eax
+	je	L2
+	movl	$1, %esi
+L2:
+	andl	$-262145, %eax
+	pushl	%eax
+	call	_io_store_eflags
+	popl	%eax
+	movl	%esi, %eax
+	testb	%al, %al
+	jne	L5
+L3:
+	pushl	12(%ebp)
+	pushl	8(%ebp)
+	call	_memtest_sub
+	popl	%edx
+	movl	%eax, %ebx
+	popl	%ecx
+	movl	%esi, %eax
+	testb	%al, %al
+	jne	L6
+L4:
+	leal	-8(%ebp), %esp
+	movl	%ebx, %eax
+	popl	%ebx
+	popl	%esi
+	popl	%ebp
+	ret
+L6:
+	call	_load_cr0
+	andl	$-1610612737, %eax
+	pushl	%eax
+	call	_store_cr0
+	popl	%eax
+	jmp	L4
+L5:
+	call	_load_cr0
+	orl	$1610612736, %eax
+	pushl	%eax
+	call	_store_cr0
+	popl	%ebx
+	jmp	L3
+	.balign 2
+.globl _memman_init
+	.def	_memman_init;	.scl	2;	.type	32;	.endef
+_memman_init:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	8(%ebp), %eax
+	movl	$0, (%eax)
+	movl	$0, 4(%eax)
+	movl	$0, 8(%eax)
+	movl	$0, 12(%eax)
+	popl	%ebp
+	ret
+	.balign 2
+.globl _memman_total
+	.def	_memman_total;	.scl	2;	.type	32;	.endef
+_memman_total:
+	pushl	%ebp
+	xorl	%eax, %eax
+	movl	%esp, %ebp
+	xorl	%edx, %edx
+	pushl	%ebx
+	movl	8(%ebp), %ebx
+	movl	(%ebx), %ecx
+	cmpl	%ecx, %eax
+	jae	L15
+L13:
+	addl	20(%ebx,%edx,8), %eax
+	incl	%edx
+	cmpl	%ecx, %edx
+	jb	L13
+L15:
+	popl	%ebx
+	popl	%ebp
+	ret
+	.balign 2
+.globl _memman_alloc
+	.def	_memman_alloc;	.scl	2;	.type	32;	.endef
+_memman_alloc:
+	pushl	%ebp
+	xorl	%ecx, %ecx
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	movl	12(%ebp), %esi
+	movl	8(%ebp), %ebx
+	movl	(%ebx), %eax
+	cmpl	%eax, %ecx
+	jae	L30
+L28:
+	movl	20(%ebx,%ecx,8), %edx
+	cmpl	%esi, %edx
+	jae	L32
+	incl	%ecx
+	cmpl	%eax, %ecx
+	jb	L28
+L30:
+	xorl	%eax, %eax
+L16:
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+L32:
+	movl	16(%ebx,%ecx,8), %edi
+	leal	(%esi,%edi), %eax
+	movl	%eax, 16(%ebx,%ecx,8)
+	movl	%edx, %eax
+	subl	%esi, %eax
+	movl	%eax, 20(%ebx,%ecx,8)
+	testl	%eax, %eax
+	jne	L22
+	movl	(%ebx), %eax
+	decl	%eax
+	movl	%eax, (%ebx)
+	cmpl	%eax, %ecx
+	jae	L22
+	movl	%eax, %esi
+L27:
+	movl	24(%ebx,%ecx,8), %eax
+	movl	28(%ebx,%ecx,8), %edx
+	movl	%eax, 16(%ebx,%ecx,8)
+	movl	%edx, 20(%ebx,%ecx,8)
+	incl	%ecx
+	cmpl	%esi, %ecx
+	jb	L27
+L22:
+	movl	%edi, %eax
+	jmp	L16
+	.balign 2
+.globl _memman_free
+	.def	_memman_free;	.scl	2;	.type	32;	.endef
+_memman_free:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	movl	8(%ebp), %esi
+	pushl	%ebx
+	xorl	%ebx, %ebx
+	movl	(%esi), %edi
+	cmpl	%edi, %ebx
+	jge	L35
+L39:
+	movl	12(%ebp), %eax
+	cmpl	%eax, 16(%esi,%ebx,8)
+	ja	L35
+	incl	%ebx
+	cmpl	%edi, %ebx
+	jl	L39
+L35:
+	testl	%ebx, %ebx
+	jle	L40
+	movl	12(%esi,%ebx,8), %edx
+	movl	8(%esi,%ebx,8), %eax
+	addl	%edx, %eax
+	cmpl	12(%ebp), %eax
+	je	L63
+L40:
+	cmpl	%edi, %ebx
+	jge	L49
+	movl	12(%ebp), %eax
+	addl	16(%ebp), %eax
+	cmpl	16(%esi,%ebx,8), %eax
+	je	L64
+L49:
+	cmpl	$4089, %edi
+	jg	L51
+	movl	%edi, %ecx
+	cmpl	%ebx, %edi
+	jle	L61
+L56:
+	movl	8(%esi,%ecx,8), %eax
+	movl	12(%esi,%ecx,8), %edx
+	movl	%eax, 16(%esi,%ecx,8)
+	movl	%edx, 20(%esi,%ecx,8)
+	decl	%ecx
+	cmpl	%ebx, %ecx
+	jg	L56
+L61:
+	leal	1(%edi), %eax
+	movl	%eax, (%esi)
+	cmpl	%eax, 4(%esi)
+	jge	L57
+	movl	%eax, 4(%esi)
+L57:
+	movl	12(%ebp), %eax
+	movl	%eax, 16(%esi,%ebx,8)
+	movl	16(%ebp), %eax
+	movl	%eax, 20(%esi,%ebx,8)
+L62:
+	xorl	%eax, %eax
+L33:
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+L51:
+	movl	16(%ebp), %eax
+	incl	12(%esi)
+	addl	%eax, 8(%esi)
+	orl	$-1, %eax
+	jmp	L33
+L64:
+	movl	12(%ebp), %eax
+	movl	%eax, 16(%esi,%ebx,8)
+	movl	16(%ebp), %eax
+	addl	%eax, 20(%esi,%ebx,8)
+	jmp	L62
+L63:
+	addl	16(%ebp), %edx
+	movl	%edx, 12(%esi,%ebx,8)
+	cmpl	(%esi), %ebx
+	jge	L62
+	movl	12(%ebp), %eax
+	addl	16(%ebp), %eax
+	cmpl	16(%esi,%ebx,8), %eax
+	jne	L62
+	addl	20(%esi,%ebx,8), %edx
+	movl	%edx, 12(%esi,%ebx,8)
+	movl	(%esi), %eax
+	decl	%eax
+	movl	%eax, (%esi)
+	cmpl	%eax, %ebx
+	jge	L62
+	movl	%eax, %ecx
+L48:
+	movl	24(%esi,%ebx,8), %eax
+	movl	28(%esi,%ebx,8), %edx
+	movl	%eax, 16(%esi,%ebx,8)
+	movl	%edx, 20(%esi,%ebx,8)
+	incl	%ebx
+	cmpl	%ecx, %ebx
+	jl	L48
+	jmp	L62
+	.balign 2
+.globl _memman_alloc_4K
+	.def	_memman_alloc_4K;	.scl	2;	.type	32;	.endef
+_memman_alloc_4K:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	12(%ebp), %eax
+	addl	$4095, %eax
+	andl	$-4096, %eax
+	movl	%eax, 12(%ebp)
+	popl	%ebp
+	jmp	_memman_alloc
+	.balign 2
+.globl _memman_free_4K
+	.def	_memman_free_4K;	.scl	2;	.type	32;	.endef
+_memman_free_4K:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	16(%ebp), %eax
+	addl	$4095, %eax
+	andl	$-4096, %eax
+	movl	%eax, 16(%ebp)
+	popl	%ebp
+	jmp	_memman_free
+	.def	_memtest_sub;	.scl	2;	.type	32;	.endef
+	.def	_store_cr0;	.scl	2;	.type	32;	.endef
+	.def	_load_cr0;	.scl	2;	.type	32;	.endef
+	.def	_io_store_eflags;	.scl	2;	.type	32;	.endef
+	.def	_io_load_eflags;	.scl	2;	.type	32;	.endef

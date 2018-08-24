@@ -1,0 +1,1088 @@
+	.file	"sheet.c"
+	.data
+LC0:
+	.ascii "arafat\0"
+	.space 33
+	.text
+	.balign 2
+.globl _sheet
+	.def	_sheet;	.scl	2;	.type	32;	.endef
+_sheet:
+	pushl	%ebp
+	movl	$7, %ecx
+	movl	%esp, %ebp
+	xorl	%eax, %eax
+	pushl	%edi
+	pushl	%esi
+	leal	-60(%ebp), %edi
+	cld
+	pushl	%ebx
+	movl	$LC0, %esi
+	subl	$48, %esp
+	rep
+	movsb
+	leal	-53(%ebp), %edi
+	movl	$33, %ecx
+	rep
+	stosb
+	pushl	24(%ebp)
+	pushl	20(%ebp)
+	pushl	16(%ebp)
+	pushl	12(%ebp)
+	movl	8(%ebp), %ebx
+	movl	8(%ebp), %esi
+	addl	$4, %ebx
+	call	_shtctl_init
+	movl	8(%ebp), %edx
+	addl	$32, %esi
+	movl	$2, %edi
+	movl	%eax, (%edx)
+	pushl	%eax
+	call	_sheet_alloc
+	movl	%eax, 20(%ebx)
+	movl	8(%ebp), %eax
+	pushl	(%eax)
+	call	_sheet_alloc
+	movl	%eax, 20(%esi)
+	movl	20(%ebp), %eax
+	imull	24(%ebp), %eax
+	pushl	%eax
+	pushl	12(%ebp)
+	call	_memman_alloc_4K
+	addl	$32, %esp
+	movl	%eax, 24(%ebx)
+	pushl	$256
+	pushl	12(%ebp)
+	call	_memman_alloc
+	movl	%eax, 24(%esi)
+	pushl	$-1
+	pushl	24(%ebp)
+	pushl	20(%ebp)
+	pushl	24(%ebx)
+	pushl	20(%ebx)
+	call	_sheet_setbuf
+	pushl	$15
+	pushl	$16
+	pushl	$16
+	pushl	24(%esi)
+	pushl	20(%esi)
+	call	_sheet_setbuf
+	addl	$48, %esp
+	pushl	24(%ebp)
+	pushl	20(%ebp)
+	pushl	24(%ebx)
+	call	_init_screen
+	pushl	$15
+	pushl	24(%esi)
+	call	_init_mouse_cursor8
+	movl	8(%ebp), %edx
+	pushl	$0
+	pushl	$0
+	pushl	20(%ebx)
+	pushl	(%edx)
+	call	_sheet_slide
+	addl	$36, %esp
+	movl	20(%ebp), %edx
+	subl	$16, %edx
+	movl	%edx, %eax
+	cltd
+	idivl	%edi
+	movl	24(%ebp), %edx
+	movl	%eax, %ecx
+	subl	$44, %edx
+	movl	%edx, %eax
+	cltd
+	idivl	%edi
+	pushl	%eax
+	movl	8(%ebp), %edx
+	pushl	%ecx
+	pushl	20(%esi)
+	pushl	(%edx)
+	call	_sheet_slide
+	movl	8(%ebp), %eax
+	pushl	$0
+	pushl	20(%ebx)
+	pushl	(%eax)
+	call	_sheet_updown
+	movl	8(%ebp), %edx
+	movl	$1, 3588(%edx)
+	leal	-12(%ebp), %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+	.balign 2
+.globl _updown_mouse
+	.def	_updown_mouse;	.scl	2;	.type	32;	.endef
+_updown_mouse:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	8(%ebp), %eax
+	pushl	3588(%eax)
+	pushl	52(%eax)
+	pushl	(%eax)
+	call	_sheet_updown
+	leave
+	ret
+	.balign 2
+.globl _Make_Window
+	.def	_Make_Window;	.scl	2;	.type	32;	.endef
+_Make_Window:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	subl	$32, %esp
+	movl	8(%ebp), %ebx
+	movl	16(%ebp), %edi
+	movl	3588(%ebx), %eax
+	incl	%eax
+	movl	%eax, 3588(%ebx)
+	imull	$28, %eax, %eax
+	leal	4(%eax,%ebx), %esi
+	movl	20(%edi), %eax
+	imull	24(%edi), %eax
+	pushl	%eax
+	pushl	12(%ebp)
+	call	_memman_alloc_4K
+	movl	%eax, 24(%esi)
+	pushl	(%ebx)
+	call	_sheet_alloc
+	movl	%eax, 20(%esi)
+	pushl	$15
+	pushl	24(%edi)
+	pushl	20(%edi)
+	pushl	24(%esi)
+	pushl	%eax
+	call	_sheet_setbuf
+	addl	$32, %esp
+	pushl	%edi
+	pushl	24(%edi)
+	pushl	20(%edi)
+	pushl	24(%esi)
+	call	_make_window8
+	movl	(%ebx), %eax
+	movl	20(%esi), %edx
+	movl	%eax, 4(%edx)
+	pushl	24(%ebp)
+	pushl	20(%ebp)
+	pushl	%edx
+	pushl	(%ebx)
+	call	_sheet_slide
+	movl	3588(%ebx), %eax
+	addl	$32, %esp
+	decl	%eax
+	pushl	%eax
+	pushl	20(%esi)
+	pushl	(%ebx)
+	call	_sheet_updown
+	pushl	%edi
+	pushl	%esi
+	call	_strcpy
+	movl	20(%esi), %eax
+	movl	%eax, 28(%edi)
+	leal	-12(%ebp), %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+	.balign 2
+.globl _Make_Window_Base
+	.def	_Make_Window_Base;	.scl	2;	.type	32;	.endef
+_Make_Window_Base:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	subl	$32, %esp
+	movl	8(%ebp), %edi
+	movl	16(%ebp), %ebx
+	movl	3588(%edi), %eax
+	incl	%eax
+	movl	%eax, 3588(%edi)
+	imull	$28, %eax, %eax
+	leal	4(%eax,%edi), %esi
+	movl	20(%ebx), %eax
+	imull	24(%ebx), %eax
+	pushl	%eax
+	pushl	12(%ebp)
+	call	_memman_alloc_4K
+	movl	%eax, 24(%esi)
+	pushl	(%edi)
+	call	_sheet_alloc
+	movl	%eax, 20(%esi)
+	pushl	$15
+	pushl	24(%ebx)
+	pushl	20(%ebx)
+	pushl	24(%esi)
+	pushl	%eax
+	call	_sheet_setbuf
+	addl	$32, %esp
+	pushl	%ebx
+	pushl	24(%ebx)
+	pushl	20(%ebx)
+	pushl	24(%esi)
+	call	_make_window8
+	pushl	%ebx
+	pushl	%esi
+	call	_strcpy
+	movl	(%edi), %eax
+	movl	20(%esi), %edx
+	movl	%edx, 28(%ebx)
+	movl	%eax, 4(%edx)
+	leal	-12(%ebp), %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+	.balign 2
+.globl _Make_Console_Base
+	.def	_Make_Console_Base;	.scl	2;	.type	32;	.endef
+_Make_Console_Base:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	subl	$32, %esp
+	movl	8(%ebp), %edi
+	movl	16(%ebp), %ebx
+	movl	3588(%edi), %eax
+	incl	%eax
+	movl	%eax, 3588(%edi)
+	imull	$28, %eax, %eax
+	leal	4(%eax,%edi), %esi
+	movl	20(%ebx), %eax
+	imull	24(%ebx), %eax
+	pushl	%eax
+	pushl	12(%ebp)
+	call	_memman_alloc_4K
+	movl	%eax, 24(%esi)
+	pushl	(%edi)
+	call	_sheet_alloc
+	movl	%eax, 20(%esi)
+	pushl	$15
+	pushl	24(%ebx)
+	pushl	20(%ebx)
+	pushl	24(%esi)
+	pushl	%eax
+	call	_sheet_setbuf
+	addl	$32, %esp
+	pushl	%ebx
+	pushl	24(%ebx)
+	pushl	20(%ebx)
+	pushl	24(%esi)
+	call	_make_Console8
+	pushl	%ebx
+	pushl	%esi
+	call	_strcpy
+	movl	(%edi), %eax
+	movl	20(%esi), %edx
+	movl	%edx, 28(%ebx)
+	movl	%eax, 4(%edx)
+	leal	-12(%ebp), %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+	.balign 2
+.globl _Make_Win1
+	.def	_Make_Win1;	.scl	2;	.type	32;	.endef
+_Make_Win1:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	subl	$32, %esp
+	movl	8(%ebp), %edi
+	movl	16(%ebp), %esi
+	movl	3588(%edi), %eax
+	incl	%eax
+	movl	%eax, 3588(%edi)
+	imull	$28, %eax, %eax
+	leal	4(%eax,%edi), %ebx
+	movl	20(%esi), %eax
+	imull	24(%esi), %eax
+	pushl	%eax
+	pushl	12(%ebp)
+	call	_memman_alloc_4K
+	movl	%eax, 24(%ebx)
+	pushl	(%edi)
+	call	_sheet_alloc
+	movl	%eax, 20(%ebx)
+	pushl	$15
+	pushl	24(%esi)
+	pushl	20(%esi)
+	pushl	24(%ebx)
+	pushl	%eax
+	call	_sheet_setbuf
+	addl	$32, %esp
+	pushl	%esi
+	pushl	24(%esi)
+	pushl	20(%esi)
+	pushl	24(%ebx)
+	call	_make_window8
+	pushl	$20
+	pushl	$100
+	pushl	$28
+	pushl	$8
+	pushl	20(%ebx)
+	call	_make_textbox8
+	addl	$36, %esp
+	pushl	24(%ebp)
+	pushl	20(%ebp)
+	pushl	20(%ebx)
+	pushl	(%edi)
+	call	_sheet_slide
+	movl	3588(%edi), %eax
+	decl	%eax
+	pushl	%eax
+	pushl	20(%ebx)
+	pushl	(%edi)
+	call	_sheet_updown
+	pushl	%esi
+	pushl	%ebx
+	call	_strcpy
+	movl	(%edi), %eax
+	movl	20(%ebx), %edx
+	movl	%edx, 28(%esi)
+	movl	%eax, 4(%edx)
+	leal	-12(%ebp), %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+	.balign 2
+.globl _Make_Console
+	.def	_Make_Console;	.scl	2;	.type	32;	.endef
+_Make_Console:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	pushl	%eax
+	movl	16(%ebp), %esi
+	movl	20(%ebp), %eax
+	movl	8(%ebp), %ebx
+	movl	%eax, -16(%ebp)
+	movl	24(%ebp), %edi
+	pushl	%esi
+	pushl	12(%ebp)
+	pushl	%ebx
+	call	_Make_Console_Base
+	pushl	%edi
+	pushl	-16(%ebp)
+	pushl	28(%esi)
+	pushl	(%ebx)
+	call	_sheet_slide
+	movl	3588(%ebx), %eax
+	decl	%eax
+	addl	$28, %esp
+	movl	%eax, 16(%ebp)
+	movl	28(%esi), %eax
+	movl	%eax, 12(%ebp)
+	movl	(%ebx), %eax
+	movl	%eax, 8(%ebp)
+	leal	-12(%ebp), %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	jmp	_sheet_updown
+	.balign 2
+.globl _shtctl_init
+	.def	_shtctl_init;	.scl	2;	.type	32;	.endef
+_shtctl_init:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	movl	8(%ebp), %esi
+	pushl	$10260
+	movl	16(%ebp), %edi
+	pushl	%esi
+	call	_memman_alloc_4K
+	movl	%eax, %ebx
+	popl	%eax
+	popl	%edx
+	xorl	%eax, %eax
+	testl	%ebx, %ebx
+	je	L8
+	movl	20(%ebp), %eax
+	imull	%edi, %eax
+	pushl	%eax
+	pushl	%esi
+	call	_memman_alloc_4K
+	testl	%eax, %eax
+	movl	%eax, 4(%ebx)
+	popl	%edx
+	popl	%ecx
+	je	L19
+	movl	12(%ebp), %eax
+	movl	%edi, 8(%ebx)
+	movl	%eax, (%ebx)
+	movl	$255, %edx
+	movl	20(%ebp), %eax
+	movl	%eax, 12(%ebx)
+	leal	1076(%ebx), %eax
+	movl	$-1, 16(%ebx)
+L15:
+	movl	$0, (%eax)
+	addl	$36, %eax
+	decl	%edx
+	jns	L15
+L18:
+	movl	%ebx, %eax
+L8:
+	leal	-12(%ebp), %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+L19:
+	pushl	$10260
+	pushl	%ebx
+	pushl	%esi
+	call	_memman_free_4K
+	jmp	L18
+	.balign 2
+.globl _sheet_alloc
+	.def	_sheet_alloc;	.scl	2;	.type	32;	.endef
+_sheet_alloc:
+	pushl	%ebp
+	xorl	%edx, %edx
+	movl	%esp, %ebp
+	movl	8(%ebp), %ecx
+	leal	1044(%ecx), %eax
+L26:
+	cmpl	$0, 32(%eax)
+	je	L29
+	incl	%edx
+	addl	$36, %eax
+	cmpl	$255, %edx
+	jle	L26
+	xorl	%eax, %eax
+L20:
+	popl	%ebp
+	ret
+L29:
+	movl	$1, 32(%eax)
+	movl	$-1, 28(%eax)
+	movl	%ecx, 4(%eax)
+	jmp	L20
+	.balign 2
+.globl _sheet_setbuf
+	.def	_sheet_setbuf;	.scl	2;	.type	32;	.endef
+_sheet_setbuf:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	8(%ebp), %edx
+	movl	12(%ebp), %eax
+	movl	%eax, (%edx)
+	movl	16(%ebp), %eax
+	movl	%eax, 8(%edx)
+	movl	20(%ebp), %eax
+	movl	%eax, 12(%edx)
+	movl	24(%ebp), %eax
+	movl	%eax, 24(%edx)
+	popl	%ebp
+	ret
+	.balign 2
+.globl _sheet_updown
+	.def	_sheet_updown;	.scl	2;	.type	32;	.endef
+_sheet_updown:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	movl	8(%ebp), %edx
+	pushl	%ebx
+	movl	12(%ebp), %esi
+	movl	16(%ebp), %ebx
+	movl	16(%edx), %eax
+	incl	%eax
+	movl	28(%esi), %edi
+	cmpl	%eax, %ebx
+	jle	L32
+	movl	%eax, %ebx
+L32:
+	cmpl	$-1, %ebx
+	jge	L33
+	orl	$-1, %ebx
+L33:
+	movl	%ebx, 28(%esi)
+	cmpl	%ebx, %edi
+	jle	L34
+	testl	%ebx, %ebx
+	js	L35
+	movl	%edi, %ecx
+L40:
+	movl	8(%ebp), %edx
+	movl	16(%edx,%ecx,4), %eax
+	movl	%eax, 20(%edx,%ecx,4)
+	movl	%ecx, 28(%eax)
+	decl	%ecx
+	cmpl	%ebx, %ecx
+	jg	L40
+	movl	%esi, 20(%edx,%ebx,4)
+	incl	%ebx
+	pushl	%ebx
+	movl	20(%esi), %ecx
+	movl	%ecx, %eax
+	addl	12(%esi), %eax
+	pushl	%eax
+	movl	16(%esi), %edx
+	movl	%edx, %eax
+	addl	8(%esi), %eax
+	pushl	%eax
+	pushl	%ecx
+	pushl	%edx
+	pushl	8(%ebp)
+	call	_sheet_refreshmap
+	pushl	%edi
+L70:
+	pushl	%ebx
+L69:
+	movl	20(%esi), %ecx
+	movl	%ecx, %eax
+	addl	12(%esi), %eax
+	pushl	%eax
+	movl	16(%esi), %edx
+	movl	%edx, %eax
+	addl	8(%esi), %eax
+	pushl	%eax
+	pushl	%ecx
+	pushl	%edx
+	pushl	8(%ebp)
+	call	_sheet_refreshsub
+	addl	$52, %esp
+L31:
+	leal	-12(%ebp), %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+L35:
+	movl	8(%ebp), %edx
+	movl	16(%edx), %eax
+	cmpl	%edi, %eax
+	jle	L42
+	movl	%edi, %ecx
+	cmpl	%eax, %edi
+	jge	L42
+L47:
+	movl	8(%ebp), %edx
+	movl	24(%edx,%ecx,4), %eax
+	movl	%eax, 20(%edx,%ecx,4)
+	movl	%ecx, 28(%eax)
+	incl	%ecx
+	cmpl	16(%edx), %ecx
+	jl	L47
+L42:
+	movl	8(%ebp), %eax
+	decl	16(%eax)
+	pushl	$0
+	movl	20(%esi), %ecx
+	movl	%ecx, %eax
+	addl	12(%esi), %eax
+	pushl	%eax
+	movl	16(%esi), %edx
+	movl	%edx, %eax
+	addl	8(%esi), %eax
+	pushl	%eax
+	pushl	%ecx
+	pushl	%edx
+	pushl	8(%ebp)
+	call	_sheet_refreshmap
+	leal	-1(%edi), %eax
+	pushl	%eax
+	pushl	$0
+	jmp	L69
+L34:
+	cmpl	%ebx, %edi
+	jge	L31
+	testl	%edi, %edi
+	js	L50
+	movl	%edi, %ecx
+	cmpl	%ebx, %edi
+	jge	L66
+L55:
+	movl	8(%ebp), %edx
+	movl	24(%edx,%ecx,4), %eax
+	movl	%eax, 20(%edx,%ecx,4)
+	movl	%ecx, 28(%eax)
+	incl	%ecx
+	cmpl	%ebx, %ecx
+	jl	L55
+L66:
+	movl	8(%ebp), %eax
+	movl	%esi, 20(%eax,%ebx,4)
+L56:
+	pushl	%ebx
+	movl	20(%esi), %ecx
+	movl	%ecx, %eax
+	addl	12(%esi), %eax
+	pushl	%eax
+	movl	16(%esi), %edx
+	movl	%edx, %eax
+	addl	8(%esi), %eax
+	pushl	%eax
+	pushl	%ecx
+	pushl	%edx
+	pushl	8(%ebp)
+	call	_sheet_refreshmap
+	pushl	%ebx
+	jmp	L70
+L50:
+	movl	8(%ebp), %edx
+	movl	16(%edx), %ecx
+	cmpl	%ebx, %ecx
+	jl	L68
+L61:
+	movl	8(%ebp), %eax
+	movl	20(%eax,%ecx,4), %edx
+	movl	%edx, 24(%eax,%ecx,4)
+	leal	1(%ecx), %eax
+	decl	%ecx
+	movl	%eax, 28(%edx)
+	cmpl	%ebx, %ecx
+	jge	L61
+L68:
+	movl	8(%ebp), %edx
+	movl	%esi, 20(%edx,%ebx,4)
+	incl	16(%edx)
+	jmp	L56
+	.balign 2
+.globl _sheet_refreshsub
+	.def	_sheet_refreshsub;	.scl	2;	.type	32;	.endef
+_sheet_refreshsub:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	subl	$44, %esp
+	movl	8(%ebp), %eax
+	movl	8(%ebp), %edx
+	cmpl	$0, 12(%ebp)
+	movl	(%eax), %eax
+	movl	4(%edx), %edx
+	movl	%eax, -36(%ebp)
+	movl	%edx, -40(%ebp)
+	js	L102
+L72:
+	cmpl	$0, 16(%ebp)
+	js	L103
+L73:
+	movl	8(%ebp), %esi
+	movl	8(%esi), %eax
+	cmpl	%eax, 20(%ebp)
+	jle	L74
+	movl	%eax, 20(%ebp)
+L74:
+	movl	8(%ebp), %edi
+	movl	12(%edi), %eax
+	cmpl	%eax, 24(%ebp)
+	jle	L75
+	movl	%eax, 24(%ebp)
+L75:
+	movl	28(%ebp), %eax
+	movl	32(%ebp), %edx
+	movl	%eax, -16(%ebp)
+	cmpl	%edx, %eax
+	jg	L97
+L95:
+	movl	8(%ebp), %edi
+	movl	-16(%ebp), %esi
+	movl	16(%ebp), %ecx
+	movl	20(%edi,%esi,4), %ebx
+	movl	20(%ebp), %esi
+	movl	(%ebx), %eax
+	movl	20(%ebx), %edx
+	movl	%eax, -32(%ebp)
+	subl	%edx, %ecx
+	movl	%ebx, %eax
+	subl	%edi, %eax
+	movl	24(%ebp), %edi
+	subl	$1044, %eax
+	subl	%edx, %edi
+	sarl	$2, %eax
+	movl	12(%ebp), %edx
+	imull	$954437177, %eax, %eax
+	movb	%al, -41(%ebp)
+	movl	%edi, -56(%ebp)
+	movl	16(%ebx), %eax
+	subl	%eax, %esi
+	subl	%eax, %edx
+	movl	%esi, -28(%ebp)
+	movl	%edx, -24(%ebp)
+	js	L104
+L80:
+	testl	%ecx, %ecx
+	js	L105
+L81:
+	movl	8(%ebx), %eax
+	cmpl	%eax, -28(%ebp)
+	jle	L82
+	movl	%eax, -28(%ebp)
+L82:
+	movl	12(%ebx), %eax
+	cmpl	%eax, -56(%ebp)
+	jle	L83
+	movl	%eax, -56(%ebp)
+L83:
+	movl	%ecx, %esi
+	cmpl	-56(%ebp), %ecx
+	jge	L99
+L94:
+	movl	20(%ebx), %edi
+	movl	-24(%ebp), %ecx
+	addl	%esi, %edi
+	cmpl	-28(%ebp), %ecx
+	movl	%edi, -20(%ebp)
+	jge	L101
+L93:
+	movl	8(%ebp), %edx
+	movl	-20(%ebp), %edi
+	movl	16(%ebx), %eax
+	imull	8(%edx), %edi
+	addl	%ecx, %eax
+	movb	-41(%ebp), %dl
+	addl	%edi, %eax
+	movl	-40(%ebp), %edi
+	movl	%eax, -52(%ebp)
+	cmpb	%dl, (%eax,%edi)
+	je	L106
+L90:
+	incl	%ecx
+	cmpl	-28(%ebp), %ecx
+	jl	L93
+L101:
+	incl	%esi
+	cmpl	-56(%ebp), %esi
+	jl	L94
+L99:
+	movl	32(%ebp), %esi
+	incl	-16(%ebp)
+	cmpl	%esi, -16(%ebp)
+	jle	L95
+L97:
+	addl	$44, %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+L106:
+	movl	%esi, %eax
+	movl	-32(%ebp), %edx
+	imull	8(%ebx), %eax
+	addl	%ecx, %eax
+	movl	-36(%ebp), %edi
+	movb	(%eax,%edx), %al
+	movl	-52(%ebp), %edx
+	movb	%al, (%edx,%edi)
+	jmp	L90
+L105:
+	xorl	%ecx, %ecx
+	jmp	L81
+L104:
+	movl	$0, -24(%ebp)
+	jmp	L80
+L103:
+	movl	$0, 16(%ebp)
+	jmp	L73
+L102:
+	movl	$0, 12(%ebp)
+	jmp	L72
+	.balign 2
+.globl _sheet_refreshmap
+	.def	_sheet_refreshmap;	.scl	2;	.type	32;	.endef
+_sheet_refreshmap:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	subl	$40, %esp
+	movl	8(%ebp), %eax
+	cmpl	$0, 12(%ebp)
+	movl	4(%eax), %eax
+	movl	%eax, -40(%ebp)
+	js	L138
+L108:
+	cmpl	$0, 16(%ebp)
+	js	L139
+L109:
+	movl	8(%ebp), %edx
+	movl	8(%edx), %eax
+	cmpl	%eax, 20(%ebp)
+	jle	L110
+	movl	%eax, 20(%ebp)
+L110:
+	movl	8(%ebp), %esi
+	movl	12(%esi), %eax
+	cmpl	%eax, 24(%ebp)
+	jle	L111
+	movl	%eax, 24(%ebp)
+L111:
+	movl	8(%ebp), %eax
+	movl	28(%ebp), %edi
+	movl	%edi, -16(%ebp)
+	cmpl	16(%eax), %edi
+	jg	L133
+L131:
+	movl	8(%ebp), %esi
+	movl	-16(%ebp), %edx
+	movl	16(%ebp), %ebx
+	movl	20(%esi,%edx,4), %ecx
+	movl	%ecx, %eax
+	subl	%esi, %eax
+	movl	(%ecx), %edi
+	subl	$1044, %eax
+	movl	20(%ecx), %edx
+	sarl	$2, %eax
+	movl	%edi, -32(%ebp)
+	imull	$954437177, %eax, %eax
+	movl	24(%ebp), %edi
+	subl	%edx, %ebx
+	subl	%edx, %edi
+	movb	%al, -33(%ebp)
+	movl	20(%ebp), %esi
+	movl	12(%ebp), %edx
+	movl	16(%ecx), %eax
+	movl	%edi, -44(%ebp)
+	subl	%eax, %esi
+	subl	%eax, %edx
+	movl	%esi, -52(%ebp)
+	movl	%edx, -28(%ebp)
+	js	L140
+L116:
+	testl	%ebx, %ebx
+	js	L141
+L117:
+	movl	8(%ecx), %eax
+	cmpl	%eax, -52(%ebp)
+	jle	L118
+	movl	%eax, -52(%ebp)
+L118:
+	movl	12(%ecx), %eax
+	cmpl	%eax, -44(%ebp)
+	jle	L119
+	movl	%eax, -44(%ebp)
+L119:
+	cmpl	-44(%ebp), %ebx
+	jge	L135
+L130:
+	movl	20(%ecx), %esi
+	movl	-28(%ebp), %edx
+	addl	%ebx, %esi
+	cmpl	-52(%ebp), %edx
+	movl	%esi, -24(%ebp)
+	jge	L137
+L129:
+	movl	%ebx, %eax
+	movl	16(%ecx), %edi
+	imull	8(%ecx), %eax
+	addl	%edx, %edi
+	movl	-32(%ebp), %esi
+	addl	%edx, %eax
+	movl	%edi, -20(%ebp)
+	movzbl	(%eax,%esi), %esi
+	cmpl	24(%ecx), %esi
+	je	L126
+	movl	8(%ebp), %edi
+	movl	-24(%ebp), %eax
+	movl	-40(%ebp), %esi
+	imull	8(%edi), %eax
+	addl	-20(%ebp), %eax
+	movl	%eax, -48(%ebp)
+	movb	-33(%ebp), %al
+	movl	-48(%ebp), %edi
+	movb	%al, (%edi,%esi)
+L126:
+	incl	%edx
+	cmpl	-52(%ebp), %edx
+	jl	L129
+L137:
+	incl	%ebx
+	cmpl	-44(%ebp), %ebx
+	jl	L130
+L135:
+	movl	8(%ebp), %edx
+	incl	-16(%ebp)
+	movl	-16(%ebp), %eax
+	cmpl	16(%edx), %eax
+	jle	L131
+L133:
+	addl	$40, %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+L141:
+	xorl	%ebx, %ebx
+	jmp	L117
+L140:
+	movl	$0, -28(%ebp)
+	jmp	L116
+L139:
+	movl	$0, 16(%ebp)
+	jmp	L109
+L138:
+	movl	$0, 12(%ebp)
+	jmp	L108
+	.balign 2
+.globl _sheet_refresh
+	.def	_sheet_refresh;	.scl	2;	.type	32;	.endef
+_sheet_refresh:
+	pushl	%ebp
+	movl	%esp, %ebp
+	movl	12(%ebp), %edx
+	movl	28(%edx), %eax
+	testl	%eax, %eax
+	js	L142
+	pushl	%eax
+	pushl	%eax
+	movl	20(%edx), %ecx
+	movl	%ecx, %eax
+	addl	20(%ebp), %ecx
+	addl	28(%ebp), %eax
+	pushl	%eax
+	movl	16(%edx), %edx
+	movl	%edx, %eax
+	addl	16(%ebp), %edx
+	addl	24(%ebp), %eax
+	pushl	%eax
+	pushl	%ecx
+	pushl	%edx
+	pushl	8(%ebp)
+	call	_sheet_refreshsub
+	addl	$28, %esp
+L142:
+	leave
+	ret
+	.balign 2
+.globl _sheet_slide
+	.def	_sheet_slide;	.scl	2;	.type	32;	.endef
+_sheet_slide:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
+	pushl	%ebx
+	movl	16(%ebp), %eax
+	movl	12(%ebp), %ebx
+	movl	16(%ebx), %edi
+	movl	20(%ebx), %esi
+	movl	%eax, 16(%ebx)
+	movl	20(%ebp), %eax
+	movl	%eax, 20(%ebx)
+	cmpl	$0, 28(%ebx)
+	js	L144
+	pushl	$0
+	movl	%esi, %eax
+	addl	12(%ebx), %eax
+	pushl	%eax
+	movl	%edi, %eax
+	addl	8(%ebx), %eax
+	pushl	%eax
+	pushl	%esi
+	pushl	%edi
+	pushl	8(%ebp)
+	call	_sheet_refreshmap
+	movl	20(%ebp), %eax
+	pushl	28(%ebx)
+	addl	12(%ebx), %eax
+	pushl	%eax
+	movl	16(%ebp), %eax
+	addl	8(%ebx), %eax
+	pushl	%eax
+	pushl	20(%ebp)
+	pushl	16(%ebp)
+	pushl	8(%ebp)
+	call	_sheet_refreshmap
+	movl	28(%ebx), %eax
+	addl	$48, %esp
+	decl	%eax
+	pushl	%eax
+	movl	%esi, %eax
+	pushl	$0
+	addl	12(%ebx), %eax
+	pushl	%eax
+	movl	%edi, %eax
+	addl	8(%ebx), %eax
+	pushl	%eax
+	pushl	%esi
+	pushl	%edi
+	pushl	8(%ebp)
+	call	_sheet_refreshsub
+	movl	20(%ebp), %eax
+	pushl	28(%ebx)
+	pushl	28(%ebx)
+	addl	12(%ebx), %eax
+	pushl	%eax
+	movl	16(%ebp), %eax
+	addl	8(%ebx), %eax
+	pushl	%eax
+	pushl	20(%ebp)
+	pushl	16(%ebp)
+	pushl	8(%ebp)
+	call	_sheet_refreshsub
+	addl	$56, %esp
+L144:
+	leal	-12(%ebp), %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
+	ret
+	.balign 2
+.globl _sheet_free
+	.def	_sheet_free;	.scl	2;	.type	32;	.endef
+_sheet_free:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%ebx
+	movl	12(%ebp), %ebx
+	cmpl	$0, 28(%ebx)
+	js	L147
+	pushl	$-1
+	pushl	%ebx
+	pushl	8(%ebp)
+	call	_sheet_updown
+	addl	$12, %esp
+L147:
+	movl	$0, 32(%ebx)
+	movl	-4(%ebp), %ebx
+	leave
+	ret
+	.def	_sheet_refreshsub;	.scl	2;	.type	32;	.endef
+	.def	_sheet_refreshmap;	.scl	2;	.type	32;	.endef
+	.def	_memman_free_4K;	.scl	2;	.type	32;	.endef
+	.def	_make_textbox8;	.scl	2;	.type	32;	.endef
+	.def	_make_Console8;	.scl	2;	.type	32;	.endef
+	.def	_strcpy;	.scl	2;	.type	32;	.endef
+	.def	_make_window8;	.scl	2;	.type	32;	.endef
+	.def	_sheet_updown;	.scl	2;	.type	32;	.endef
+	.def	_sheet_slide;	.scl	2;	.type	32;	.endef
+	.def	_init_mouse_cursor8;	.scl	2;	.type	32;	.endef
+	.def	_init_screen;	.scl	2;	.type	32;	.endef
+	.def	_sheet_setbuf;	.scl	2;	.type	32;	.endef
+	.def	_memman_alloc;	.scl	2;	.type	32;	.endef
+	.def	_memman_alloc_4K;	.scl	2;	.type	32;	.endef
+	.def	_sheet_alloc;	.scl	2;	.type	32;	.endef
+	.def	_shtctl_init;	.scl	2;	.type	32;	.endef
