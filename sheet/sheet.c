@@ -142,6 +142,7 @@ struct SHEET *sheet_alloc(struct SHTCTL *ctl)
 			sht->flags = SHEET_USE; /* �g�p���}�[�N */
 			sht->height = -1; /* ��\���� */
 			sht->shtctl=ctl;
+			sht->task=0;
 			return sht;
 		}
 	}

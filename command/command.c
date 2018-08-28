@@ -4,7 +4,6 @@
 #include "..\graphic\graphic.h"
 #include "..\bootpack.h"
 #include "..\task\task.h"
-#include "..\timer\timer.h"
 #include "..\file\file.h"
 #include "..\memory\memory.h"
 #include "..\dsctbl\dsctbl.h"
@@ -149,7 +148,7 @@ void cmd_hlt(struct CONSOLE *cons,char *cmdline)
 
 void console_task(struct SHEET *sheet,unsigned int memtotal)
 {
-	struct TIMER *timer;
+	//struct TIMER *timer;
 	struct TASK *task = task_now();
 	int i, fifobuf[128],cursor0=65;
 	char s[30],cmdline[30];
@@ -168,9 +167,9 @@ void console_task(struct SHEET *sheet,unsigned int memtotal)
 	*((int *)Cons_addr)=(int)&cons;
 
 	COMMAND_FUNC func;
-	timer = timer_alloc();
-	timer_init(timer, task->fifo, 1);
-	timer_settime(timer, 50);
+	cons.timer = timer_alloc();
+	timer_init(cons.timer, task->fifo, 1);
+	timer_settime(cons.timer, 50);
 
 	putfonts8_asc_sht(sheet->shtctl,sheet, 8, 28, COL8_FAFAFA, COL_Cons_BC, "User:$", 6);
 
@@ -184,20 +183,20 @@ void console_task(struct SHEET *sheet,unsigned int memtotal)
 			io_sti();
 			if (i <= 1) { //光标用定时器
 				if (i != 0) {
-					timer_init(timer, task->fifo, 0); //下次置0
+					timer_init(cons.timer, task->fifo, 0); //下次置0
 					if (cons.cur_c >= 0)
 						cons.cur_c = COL8_FAFAFA;
 				} else {
-					timer_init(timer, task->fifo, 1); //下次置1
+					timer_init(cons.timer, task->fifo, 1); //下次置1
 					if (cons.cur_c >= 0)
 						cons.cur_c = COL_Cons_BC;
 				}
-				timer_settime(timer, 50);
+				timer_settime(cons.timer, 50);
 			}
 			if (i == 2) {	//光标ON
 				cons.cur_c = COL8_FAFAFA;
 			}
-			if (i == 3) {	//光标OF
+			if (i == 3) {	//光标OFF
 				boxfill8(sheet->buf, sheet->bxsize, COL_Cons_BC, cons.cur_x, 28, cons.cur_x + 7, 43);
 				cons.cur_c = -1;
 			}
@@ -323,6 +322,8 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 	char name[18], *p,*q;
 	struct TASK *task = task_now();
 	int i, segsiz, datsiz, esp, dathrb;
+	struct SHTCTL *shtctl;
+	struct SHEET *sht;
 
 	//生成文件名
 	for (i = 0; i < 13; i++) {
@@ -362,6 +363,14 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 				q[esp + i] = p[dathrb + i];
 			}
 			start_app(0x1b, 1003 * 8, esp, 1004 * 8, &(task->tss.esp0));
+			shtctl = (struct SHTCTL *) *((int *) ADR_shtctl);
+			for (i = 0; i < MAX_SHEETS; i++) {
+				sht = &(shtctl->sheets0[i]);
+				if (sht->flags != 0 && sht->task == task) {
+					//找到被应用程序遗留的窗口
+					sheet_free(shtctl,sht);	//关闭
+				}
+			}
 			memman_free_4K(memman, (int) q, segsiz);
 		} else {
 			cons_putstr(cons, ".hrb file format error.\n");
@@ -381,6 +390,7 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 	struct SHTCTL *shtctl=(struct SHTCTL *) *((int *)ADR_shtctl);
 	struct CONSOLE *cons = (struct CONSOLE *) *((int *) 0x0fec);
 	struct SHEET *sht;
+	int i;
 	int *reg = &eax + 1;	
 		/* reg[0] : EDI,   reg[1] : ESI,   reg[2] : EBP,   reg[3] : ESP */
 		/* reg[4] : EBX,   reg[5] : EDX,   reg[6] : ECX,   reg[7] : EAX */
@@ -394,21 +404,130 @@ int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int 
 		cons_putnstr(cons, (char *) ebx+ds_base, ecx);
 	}else if (edx == 4) {
 		return &(task->tss.esp0);
-	}else if(edx==5){
+	}else if(edx==5){	//创建
 		sht = sheet_alloc(shtctl);
+		sht->task=task;
 		sheet_setbuf(sht, (char *) ebx + ds_base, esi, edi, eax);
 		make_window8((char *) ebx + ds_base, esi, edi, (char *) ecx + ds_base);
 		sheet_slide(shtctl,sht, 100, 50);
 		sheet_updown(shtctl,sht, 3);	
 		reg[7] = (int) sht;
 	} else if (edx == 6) {
-		sht = (struct SHEET *) ebx;
+		sht = (struct SHEET *) (ebx&0xfffffffe);
 		putfonts8_asc(sht->buf, sht->bxsize, esi, edi, eax, (char *) ebp + ds_base);
-		sheet_refresh(shtctl,sht, esi, edi, esi + ecx * 8, edi + 16);
+		if ((ebx & 1) == 0)
+			sheet_refresh(shtctl,sht, esi, edi, esi + ecx * 8, edi + 16);
 	} else if (edx == 7) {
-		sht = (struct SHEET *) ebx;
+		sht = (struct SHEET *) (ebx&0xfffffffe);
 		boxfill8(sht->buf, sht->bxsize, ebp, eax, ecx, esi, edi);
-		sheet_refresh(shtctl,sht, eax, ecx, esi + 1, edi + 1);
+		if ((ebx & 1) == 0)
+			sheet_refresh(shtctl,sht, eax, ecx, esi + 1, edi + 1);
+	} else if (edx == 8) {
+		memman_init((struct MEMMAN *) (ebx + ds_base));
+		ecx &= 0xfffffff0;	//16字节为单位
+		memman_free((struct MEMMAN *) (ebx + ds_base), eax, ecx);
+	} else if (edx == 9) {
+		ecx = (ecx + 0x0f) & 0xfffffff0; 
+		reg[7] = memman_alloc((struct MEMMAN *) (ebx + ds_base), ecx);
+	} else if (edx == 10) {
+		ecx = (ecx + 0x0f) & 0xfffffff0; 
+		memman_free((struct MEMMAN *) (ebx + ds_base), eax, ecx);
+	} else if (edx == 11) {
+		sht = (struct SHEET *) (ebx&0xfffffffe);
+		sht->buf[sht->bxsize * edi + esi] = eax;
+		if ((ebx & 1) == 0)
+			sheet_refresh(sht->shtctl,sht, esi, edi, esi + 1, edi + 1);
+	} else if (edx == 12) {
+		sht = (struct SHEET *) ebx;
+		sheet_refresh(sht->shtctl,sht, eax, ecx, esi, edi);
+	} else if (edx == 13) {
+		sht = (struct SHEET *) (ebx & 0xfffffffe);
+		hrb_api_linewin(sht, eax, ecx, esi, edi, ebp);
+		if ((ebx & 1) == 0) {
+			sheet_refresh(sht->shtctl,sht, eax, ecx, esi + 1, edi + 1);
+		}
+	} else if (edx == 14) {
+		sht = (struct SHEET *) ebx;
+		sheet_free(sht->shtctl,sht);
+	} else if (edx == 15) {
+		for (;;) {
+			io_cli();
+			if (fifo32_status(task->fifo) == 0) {
+				if (eax != 0) {
+					task_sleep(task);	/* FIFO空时休眠 */
+				} else {   //退出
+					io_sti();
+					reg[7] = -1;
+					return 0;
+				}
+			}
+			i = fifo32_get(task->fifo);
+			io_sti();
+			if (i <= 1) { //光标用定时器
+				
+				timer_init(cons->timer, task->fifo, 1);
+				timer_settime(cons->timer, 50);
+			}
+			if (i == 2) {	/* 光标ON */
+				cons->cur_c = COL8_FAFAFA;
+			}
+			if (i == 3) {	/* 光标OFF */
+				cons->cur_c = -1;
+			}
+			if (256 <= i && i <= 511) { //键盘输入
+				reg[7] = i - 256;
+				return 0;
+			}
+		}
 	}
 	return 0;
+}
+
+void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1, int col)
+{
+	int i, x, y, len, dx, dy;
+
+	dx = x1 - x0;
+	dy = y1 - y0;
+	x = x0 << 10;
+	y = y0 << 10;
+	if (dx < 0) {
+		dx = - dx;
+	}
+	if (dy < 0) {
+		dy = - dy;
+	}
+	if (dx >= dy) {
+		len = dx + 1;
+		if (x0 > x1) {
+			dx = -1024;
+		} else {
+			dx =  1024;
+		}
+		if (y0 <= y1) {
+			dy = ((y1 - y0 + 1) << 10) / len;
+		} else {
+			dy = ((y1 - y0 - 1) << 10) / len;
+		}
+	} else {
+		len = dy + 1;
+		if (y0 > y1) {
+			dy = -1024;
+		} else {
+			dy =  1024;
+		}
+		if (x0 <= x1) {
+			dx = ((x1 - x0 + 1) << 10) / len;
+		} else {
+			dx = ((x1 - x0 - 1) << 10) / len;
+		}
+	}
+
+	for (i = 0; i < len; i++) {
+		sht->buf[(y >> 10) * sht->bxsize + (x >> 10)] = col;
+		x += dx;
+		y += dy;
+	}
+
+	return;
 }

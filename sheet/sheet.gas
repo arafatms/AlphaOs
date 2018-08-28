@@ -408,7 +408,7 @@ _shtctl_init:
 	pushl	%esi
 	pushl	%ebx
 	movl	8(%ebp), %esi
-	pushl	$10260
+	pushl	$11284
 	movl	16(%ebp), %edi
 	pushl	%esi
 	call	_memman_alloc_4K
@@ -438,7 +438,7 @@ _shtctl_init:
 	movl	$-1, 16(%ebx)
 L15:
 	movl	$0, (%eax)
-	addl	$36, %eax
+	addl	$40, %eax
 	decl	%edx
 	jns	L15
 L18:
@@ -451,7 +451,7 @@ L8:
 	popl	%ebp
 	ret
 L19:
-	pushl	$10260
+	pushl	$11284
 	pushl	%ebx
 	pushl	%esi
 	call	_memman_free_4K
@@ -469,7 +469,7 @@ L26:
 	cmpl	$0, 32(%eax)
 	je	L29
 	incl	%edx
-	addl	$36, %eax
+	addl	$40, %eax
 	cmpl	$255, %edx
 	jle	L26
 	xorl	%eax, %eax
@@ -480,6 +480,7 @@ L29:
 	movl	$1, 32(%eax)
 	movl	$-1, 28(%eax)
 	movl	%ecx, 4(%eax)
+	movl	$0, 36(%eax)
 	jmp	L20
 	.balign 2
 .globl _sheet_setbuf
@@ -718,9 +719,9 @@ L95:
 	movl	24(%ebp), %edi
 	subl	$1044, %eax
 	subl	%edx, %edi
-	sarl	$2, %eax
+	sarl	$3, %eax
 	movl	12(%ebp), %edx
-	imull	$954437177, %eax, %eax
+	imull	$-858993459, %eax, %eax
 	movb	%al, -41(%ebp)
 	movl	%edi, -56(%ebp)
 	movl	16(%ebx), %eax
@@ -853,9 +854,9 @@ L131:
 	movl	(%ecx), %edi
 	subl	$1044, %eax
 	movl	20(%ecx), %edx
-	sarl	$2, %eax
+	sarl	$3, %eax
 	movl	%edi, -32(%ebp)
-	imull	$954437177, %eax, %eax
+	imull	$-858993459, %eax, %eax
 	movl	24(%ebp), %edi
 	subl	%edx, %ebx
 	subl	%edx, %edi

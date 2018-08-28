@@ -2,6 +2,7 @@
 #define _SHEET_H_
 
 #include "..\memory\memory.h"
+#include "..\task\task.h"
 
 #define SHEET_USE		1
 #define MAX_SHEETS		256
@@ -11,6 +12,7 @@ struct SHEET {
 	unsigned char *buf;
 	struct SHTCTL *shtctl;
 	int bxsize, bysize, vx0, vy0, col_inv, height, flags;
+	struct TASK *task;
 };
 
 struct SHTCTL {

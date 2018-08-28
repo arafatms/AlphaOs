@@ -3,7 +3,7 @@
 
 #include "..\memory\memory.h"
 #include "..\sheet\sheet.h"
-
+#include "..\timer\timer.h"
 
 #define Console_Line_dis	20
 #define Cons_addr	0x0fec
@@ -12,6 +12,7 @@
 struct CONSOLE {
 	struct SHEET *sht;
 	int cur_x, cur_y, cur_c;
+	struct TIMER *timer;
 };
 
 typedef void (*COMMAND_FUNC)(struct CONSOLE *cons,char *cmdline);
@@ -46,5 +47,5 @@ void cons_putstr(struct CONSOLE *cons, char *s);
 void cons_putnstr(struct CONSOLE *cons, char *s, int n);
 int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline);
 int *hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax);
-
+void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1, int col);
 #endif

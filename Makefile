@@ -213,8 +213,17 @@ winhelo.exe:
 winhelo2.exe:
 	$(MAKE) -C APP winhelo2/winhelo2.exe
 
+winhelo3.exe:
+	$(MAKE) -C APP winhelo3/winhelo3.exe
+
+stars.exe:
+	$(MAKE) -C APP stars/stars.exe
+
+lines.exe:
+	$(MAKE) -C APP lines/lines.exe
+
 alpha.img : ipl10.bin alpha.sys Makefile hello.nxe a.exe hello3.exe crack1.exe \
-			crack2.nxe bug.exe hello4.exe winhelo.exe winhelo2.exe
+			crack2.nxe bug.exe hello4.exe winhelo.exe winhelo2.exe winhelo3.exe stars.exe lines.exe
 	$(EDIMG)   imgin:../z_tools/fdimg0at.tek \
 		wbinimg src:ipl10.bin len:512 from:0 to:0 \
 		copy from:alpha.sys to:@: \
@@ -229,6 +238,9 @@ alpha.img : ipl10.bin alpha.sys Makefile hello.nxe a.exe hello3.exe crack1.exe \
 		copy from:App/hello4/hello4.exe to:@: \
 		copy from:App/winhelo/winhelo.exe to:@: \
 		copy from:App/winhelo2/winhelo2.exe to:@: \
+		copy from:App/winhelo3/winhelo3.exe to:@: \
+		copy from:App/stars/stars.exe to:@: \
+		copy from:App/lines/lines.exe to:@: \
 		imgout:alpha.img
 
 # �R�}���h
