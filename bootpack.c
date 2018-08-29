@@ -116,6 +116,9 @@ void HariMain(void)
 	// timer_settime(timer_ts, 2);
 
 
+	//switch window
+	int j, x, y;
+	struct SHEET *sht;
 
 	//Command
 	Command_int(memman);
@@ -313,7 +316,7 @@ void HariMain(void)
 				}
 
 				sheet_refresh(sheet_info->shtctl,win1.sht, cursor_x, textBoxY0+3, cursor_x + 8, textBoxY0+18);
-			} else if (512 <= i && i <= 767) { /* �}�E�X�f�[�^ */
+			} else if (512 <= i && i <= 767) {   //鼠标数据
 				if (mouse_decode(&mdec, i - 512) != 0) {
 					
 					mx += mdec.x;
@@ -331,9 +334,19 @@ void HariMain(void)
 						my = sheet_info->shtctl->ysize - 1;
 					}
 					
-					sheet_slide(sheet_info->shtctl, mouse->sht, mx, my); /* sheet_refresh��܂� */
+					sheet_slide(sheet_info->shtctl, mouse->sht, mx, my); /* sheet_refresh*/
 					if((mdec.btn & 0x01)!=0){
-						sheet_slide(sheet_info->shtctl,win1.sht,mx-80,my-8);
+						for (j = sheet_info->shtctl->top - 1; j > 0; j--) {
+							sht = sheet_info->shtctl->sheets[j];
+							x = mx - sht->vx0;
+							y = my - sht->vy0;
+							if (0 <= x && x < sht->bxsize && 0 <= y && y < sht->bysize) {
+								if (sht->buf[y * sht->bxsize + x] != sht->col_inv) {
+									sheet_updown(sheet_info->shtctl,sht, sheet_info->shtctl->top - 1);
+									break;
+								}
+							}
+						}
 					}
 				}
 			} else if (i <= 1) { //控制光标
