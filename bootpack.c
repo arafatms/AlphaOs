@@ -296,6 +296,9 @@ void HariMain(void)
 					task_cons->tss.eip = (int) asm_end_app;
 					io_sti();
 				}
+				if (i == 256 + 0x57 && sheet_info->shtctl->top > 2) {	/* F11 */
+					sheet_updown(sheet_info->shtctl,sheet_info->shtctl->sheets[1], sheet_info->shtctl->top - 1);
+				}
 				if (i == 256 + 0xfa) {	//键盘成功接收到数据
 					keycmd_wait = -1;
 				}
