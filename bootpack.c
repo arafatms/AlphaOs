@@ -117,8 +117,8 @@ void HariMain(void)
 
 
 	//switch window
-	int j, x, y;
-	struct SHEET *sht;
+	int j, x, y, mmx = -1, mmy = -1;
+	struct SHEET *sht=0;
 
 	//Command
 	Command_int(memman);
@@ -335,28 +335,48 @@ void HariMain(void)
 					}
 					
 					sheet_slide(sheet_info->shtctl, mouse->sht, mx, my); /* sheet_refresh*/
-					if((mdec.btn & 0x01)!=0){
-						for (j = sheet_info->shtctl->top - 1; j > 0; j--) {
-							sht = sheet_info->shtctl->sheets[j];
-							x = mx - sht->vx0;
-							y = my - sht->vy0;
-							if (0 <= x && x < sht->bxsize && 0 <= y && y < sht->bysize) {
-								if (sht->buf[y * sht->bxsize + x] != sht->col_inv) {
-									sheet_updown(sheet_info->shtctl,sht, sheet_info->shtctl->top - 1);
-									break;
+					if ((mdec.btn & 0x01) != 0) {
+						//指针移动控制
+						
+						if (mmx < 0) {
+							//处于通常模式
+							//寻找指针所在的图层，自顶向下
+							for (j = sheet_info->shtctl->top - 1; j > 0; j--) {
+								sht = sheet_info->shtctl->sheets[j];
+								x = mx - sht->vx0;
+								y = my - sht->vy0;
+								if (0 <= x && x < sht->bxsize && 0 <= y && y < sht->bysize) {
+									if (sht->buf[y * sht->bxsize + x] != sht->col_inv) {
+										sheet_updown(sheet_info->shtctl,sht, sheet_info->shtctl->top - 1);
+										if (3 <= x && x < sht->bxsize - 3 && 3 <= y && y < 21) {
+											mmx = mx;	//进入窗口移动模式
+											mmy = my;
+										}
+										break;
+									}
 								}
 							}
+						} else {
+							//处于窗口移动模式
+							x = mx - mmx;	//计算鼠标的移动距离
+							y = my - mmy;
+							sheet_slide(sheet_info->shtctl,sht, sht->vx0 + x, sht->vy0 + y);
+							mmx = mx;	//更新为移动后的位置
+							mmy = my;
 						}
+					} else {
+						//没有按下左键
+						mmx = -1;	//返回通常模式
 					}
 				}
 			} else if (i <= 1) { //控制光标
 			if (i != 0) {
-					timer_init(timer, &fifo, 0); /* ����0�� */
+					timer_init(timer, &fifo, 0); 
 					if (cursor_c >= 0) {
 						cursor_c = COL8_000000;
 					}
 				} else {
-					timer_init(timer, &fifo, 1); /* ����1�� */
+					timer_init(timer, &fifo, 1);
 					if (cursor_c >= 0) {
 						cursor_c = COL8_FAFAFA;
 					}
