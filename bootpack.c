@@ -352,6 +352,17 @@ void HariMain(void)
 											mmx = mx;	//进入窗口移动模式
 											mmy = my;
 										}
+										if (14 <= x && x < 22 && 5 <= 9 && y < 16) {
+											//点击X按钮
+											if (sht->task != 0) {	//该窗口是否为应用程序
+												cons = (struct CONSOLE *) *((int *) Cons_addr);
+												cons_putstr(cons, "\nBreak(mouse) :\n");
+												io_cli();	
+												task_cons->tss.eax = (int) &(task_cons->tss.esp0);
+												task_cons->tss.eip = (int) asm_end_app;
+												io_sti();
+											}
+										}
 										break;
 									}
 								}

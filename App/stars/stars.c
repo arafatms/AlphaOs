@@ -15,6 +15,12 @@ void HariMain(void)
 		api_point(win+1, x, y, COL8_Blue );
 	}
     api_refreshwin(win,6,26,143,93);
+	for (;;) {
+        //api_putchar(api_getkey(1));
+		if (api_getkey(1) == 0x0a) {
+			break; /* Enter to break; */
+		}
+	}
     api_closewin(win);
 	api_end();
 }
