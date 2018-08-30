@@ -41,7 +41,7 @@ void init_palette()
 		0x84, 0x84, 0x00,	/* 11:�Â����F */
 		0x00, 0x00, 0x84,	/* 12:�Â��� */
 		0x84, 0x00, 0x84,	/* 13:�Â��� */
-		0xff, 0xff, 0xff,	/* 14:黑色 */
+		0xff, 0xff, 0xff,	/* 14:白色 */
 		0xfe, 0xfe, 0xfe,	/* 15:透明色 */
 		0x84, 0x84, 0x84,   //16
 		0x00, 0x84, 0x84,	//17
@@ -273,7 +273,7 @@ void make_window8(unsigned char *buf, int xsize, int ysize,char *title)
 	Circlefill8_No_BG(buf,xsize,3,18,12,7);   //close
 	Circlefill8_No_BG(buf,xsize,4,35,12,7);   //minimize
 	boxfill8(buf,xsize,0,33,12,38,13);
-	putfonts8_asc(buf, xsize, 53, 5, 1, title);
+	putfonts8_asc(buf, xsize, 53, 5, COL8_7C7C7C, title);
 	
 	//绘制X
 	for (y = 0; y < 7; y++) {
@@ -307,7 +307,7 @@ void make_Console8(unsigned char *buf, int xsize, int ysize,char *title)
 	Circlefill8_No_BG(buf,xsize,3,18,12,7);   //close
 	Circlefill8_No_BG(buf,xsize,4,35,12,7);   //minimize
 	boxfill8(buf,xsize,0,33,12,38,13);
-	putfonts8_asc(buf, xsize, 53, 5, 1, title);
+	putfonts8_asc(buf, xsize, 53, 5, COL8_FFFFFF, title);
 	
 	//绘制X
 	for (y = 0; y < 7; y++) {
@@ -323,15 +323,40 @@ void make_Console8(unsigned char *buf, int xsize, int ysize,char *title)
 	return;
 }
 
-void Sel_window(struct Window *window,enum Flag_Select flag){
+void Sel_window(struct SHEET *sht,enum Flag_Select flag){
 	//boxfill8(window->sht->buf,window->width,COL8_FFFFFF,53,5,75,15);
-	if(flag==OnSel){
-		putfonts8_asc(window->sht->buf, window->width,53, 5, COL8_000000, window->title);
+	int x, y, xsize = sht->bxsize;
+	char c, Window_new, Console_new, Window_old, Console_old, *buf = sht->buf;
+	if (flag==OnSel) {
+		Window_new  = COL_Cons_BC;
+		Window_old  = COL8_7C7C7C;
+
+		Console_new  = COL8_FFFFFF;
+		Console_old  = COL_Cons_BC;
+
+	} else {
+		Window_new  = COL8_7C7C7C;
+		Window_old  = COL_Cons_BC;
+
+		Console_new  = COL_Cons_BC;
+		Console_old  = COL8_FFFFFF;
 	}
-	else{
-		putfonts8_asc(window->sht->buf, window->width,53, 5, COL8_7C7C7C, window->title);
+	for (y = 5; y <= 21; y++) {
+		for (x = 53; x <= xsize - 4; x++) {
+			c = buf[y * xsize + x];
+			if(c == Window_old){
+				c=Window_new;
+				buf[y * xsize + x] = c;
+			}
+			else if(c == Console_old){
+				c= Console_new;
+				buf[y * xsize + x] = c;
+			}
+			
+			
+		}
 	}
-	sheet_refresh(window->sht->shtctl,window->sht,53,5,window->width-20,21);
+	sheet_refresh(sht->shtctl,sht,53,5,sht->bxsize-20,21);
 	//sheet_slide(window->sht->shtctl,window->sht,0,0);
 }
 

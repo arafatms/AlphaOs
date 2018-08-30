@@ -54,7 +54,8 @@ void asm_end_app(void);
 
 
 
-
+int keywin_off(struct SHEET *key_win, struct SHEET *sht_win, int cur_c, int cur_x);
+int keywin_on(struct SHEET *key_win, struct SHEET *sht_win, int cur_c);
 
 
 

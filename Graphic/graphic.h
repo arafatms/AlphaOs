@@ -54,7 +54,7 @@ void set_palette(int start, int end, unsigned char *rgb);
 void make_Console8(unsigned char *buf, int xsize, int ysize,char *title);
 void make_window8(unsigned char *buf, int xsize, int ysize,char *title);
 void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy);
-void Sel_window(struct Window *window,enum Flag_Select flag);
+void Sel_window(struct SHEET *sht,enum Flag_Select flag);
 void Sel_Console(struct Window *window,enum Flag_Select flag);
 
 void putfonts8_asc_sht(struct SHTCTL *shtctl,struct SHEET *sht, int x, int y, int c, int b, char *s, int l);

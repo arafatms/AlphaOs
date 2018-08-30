@@ -1230,7 +1230,7 @@ _make_Console8:
 	call	_boxfill8
 	addl	$52, %esp
 	pushl	20(%ebp)
-	pushl	$1
+	pushl	$14
 	pushl	$5
 	pushl	$53
 	pushl	%esi
@@ -1268,37 +1268,74 @@ L167:
 _Sel_window:
 	pushl	%ebp
 	movl	%esp, %ebp
+	pushl	%edi
+	pushl	%esi
 	pushl	%ebx
+	pushl	%eax
+	pushl	%eax
+	movl	8(%ebp), %eax
 	cmpl	$0, 12(%ebp)
-	movl	8(%ebp), %ebx
+	movl	8(%eax), %esi
+	movl	(%eax), %edi
 	jne	L169
-	pushl	%ebx
-	pushl	$7
-L171:
-	pushl	$5
-	pushl	$53
-	pushl	20(%ebx)
-	movl	28(%ebx), %eax
-	pushl	(%eax)
-	call	_putfonts8_asc
-	addl	$24, %esp
+	movb	$19, -17(%ebp)
+	movb	$1, -19(%ebp)
+	movb	$14, -18(%ebp)
+	movb	$19, -20(%ebp)
+L170:
+	imull	$5, %esi, %ecx
+	movl	$16, -16(%ebp)
+L183:
+	movl	$53, %ebx
+	leal	-4(%esi), %eax
+	cmpl	%eax, %ebx
+	jg	L187
+L182:
+	leal	(%ebx,%ecx), %edx
+	movb	(%edx,%edi), %al
+	cmpb	-19(%ebp), %al
+	je	L189
+	cmpb	-20(%ebp), %al
+	je	L190
+L177:
+	incl	%ebx
+	leal	-4(%esi), %eax
+	cmpl	%eax, %ebx
+	jle	L182
+L187:
+	addl	%esi, %ecx
+	decl	-16(%ebp)
+	jns	L183
+	movl	8(%ebp), %edx
 	pushl	$21
-	movl	20(%ebx), %eax
+	movl	8(%edx), %eax
 	subl	$20, %eax
 	pushl	%eax
 	pushl	$5
 	pushl	$53
-	pushl	28(%ebx)
-	movl	28(%ebx), %eax
-	pushl	4(%eax)
+	pushl	%edx
+	pushl	4(%edx)
 	call	_sheet_refresh
-	movl	-4(%ebp), %ebx
-	leave
+	leal	-12(%ebp), %esp
+	popl	%ebx
+	popl	%esi
+	popl	%edi
+	popl	%ebp
 	ret
+L190:
+	movb	-18(%ebp), %al
+L188:
+	movb	%al, (%edx,%edi)
+	jmp	L177
+L189:
+	movb	-17(%ebp), %al
+	jmp	L188
 L169:
-	pushl	%ebx
-	pushl	$1
-	jmp	L171
+	movb	$1, -17(%ebp)
+	movb	$19, -19(%ebp)
+	movb	$19, -18(%ebp)
+	movb	$14, -20(%ebp)
+	jmp	L170
 	.balign 2
 .globl _Sel_Console
 	.def	_Sel_Console;	.scl	2;	.type	32;	.endef
@@ -1308,10 +1345,10 @@ _Sel_Console:
 	pushl	%ebx
 	cmpl	$0, 12(%ebp)
 	movl	8(%ebp), %ebx
-	jne	L173
+	jne	L192
 	pushl	%ebx
 	pushl	$0
-L175:
+L194:
 	pushl	$5
 	pushl	$53
 	pushl	20(%ebx)
@@ -1332,10 +1369,10 @@ L175:
 	movl	-4(%ebp), %ebx
 	leave
 	ret
-L173:
+L192:
 	pushl	%ebx
 	pushl	$1
-	jmp	L175
+	jmp	L194
 	.balign 2
 .globl _make_textbox8
 	.def	_make_textbox8;	.scl	2;	.type	32;	.endef

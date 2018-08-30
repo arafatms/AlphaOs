@@ -8,11 +8,19 @@
 #define MAX_SHEETS		256
 
 #define mouse_updown	64
+
+struct Window{
+	char title[20];
+	int width,height;
+	struct SHEET *sht;
+};
+
 struct SHEET {
 	unsigned char *buf;
 	struct SHTCTL *shtctl;
 	int bxsize, bysize, vx0, vy0, col_inv, height, flags;
 	struct TASK *task;
+	char title[20];
 };
 
 struct SHTCTL {
@@ -34,11 +42,7 @@ struct SHEET_INFO{
 	int size;
 };
 
-struct Window{
-	char title[20];
-	int width,height;
-	struct SHEET *sht;
-};
+
 
 void sheet(struct SHEET_INFO *sheet_info,struct MEMMAN *memman, unsigned char *vram, int xsize, int ysize);
 struct SHTCTL *shtctl_init(struct MEMMAN *memman, unsigned char *vram, int xsize, int ysize);

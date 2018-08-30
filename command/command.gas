@@ -1068,8 +1068,6 @@ L178:
 	movl	%eax, -68(%ebp)
 	addl	$1044, %esi
 L174:
-	cmpl	$0, 32(%esi)
-	je	L171
 	movl	-56(%ebp), %edx
 	cmpl	%edx, 36(%esi)
 	je	L184
@@ -1084,6 +1082,10 @@ L171:
 	addl	$12, %esp
 	jmp	L175
 L184:
+	movl	32(%esi), %eax
+	andl	$17, %eax
+	cmpl	$17, %eax
+	jne	L171
 	pushl	%esi
 	pushl	-68(%ebp)
 	call	_sheet_free
@@ -1379,8 +1381,9 @@ L239:
 	movl	-16(%ebp), %ecx
 	movl	%eax, %esi
 	movl	%ecx, 36(%eax)
-	movl	-24(%ebp), %eax
+	orl	$16, 32(%eax)
 	pushl	36(%ebp)
+	movl	-24(%ebp), %eax
 	pushl	8(%ebp)
 	pushl	12(%ebp)
 	leal	(%eax,%edi), %ebx
